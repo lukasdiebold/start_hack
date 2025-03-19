@@ -1,0 +1,16 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/javascript-node",
+	"onCreateCommand": "curl -fsSL https://bun.sh/install | bash",
+	"postCreateCommand": "$HOME/.bun/bin/bun i --frozen-lockfile || echo 'Package installation failed, but continuing with error' >&2",
+	"customizations": {
+		"vscode": {
+			"extensions": ["biomejs.biome"],
+			"settings": {
+				"editor.defaultFormatter": "biomejs.biome",
+				"files.associations": {
+					"*.css": "tailwindcss"
+				}
+			}
+		}
+	}
+}
