@@ -64,7 +64,11 @@ const service: Service = {
 					messages: [
 						{
 							role: 'system',
-							content: `Output an 'areas' object without any codeblocks, where the number represents the percentage of a fitting: 
+							content: `
+							You are a helpful assistant which guides users though an innovation process. Your users are managing directors of company 
+							who look into how to innovate their business. In a first stage, we try to find the best innovation focus area for the company 
+							based on the sector they work in and the problems they face. Based on the following focus areas, output an 'areas' object 
+							without any codeblocks, where the number represents the percentage of a fitting for the current situation. 
 							{
 								"areasWithRating": {
 									${areas.keys.map((area) => {
@@ -76,11 +80,10 @@ const service: Service = {
 						},
 						{
 							role: 'user',
-							content: `I am ${payload.profile.toLowerCase}. 
-								Give me the percentages of how strong the areas ${
-									//build a string of possible areas
-									areas.keys.map((area) => area.name.toLowerCase).join(',\n')
-								} influences the problem: "${payload.problem}".`,
+							content: `
+								Calculate the fit of the areas for the following person. ${payload.name} works at ${payload.company} 
+								and has the problem: "${payload.problem}".
+							`,
 						},
 					],
 				});
