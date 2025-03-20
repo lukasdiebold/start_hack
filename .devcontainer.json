@@ -1,12 +1,13 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/javascript-node",
-  "onCreateCommand": "curl -fsSL https://bun.sh/install | bash",
+  "image": "mcr.microsoft.com/devcontainers/python",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
   "customizations": {
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode"],
-      "settings": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-      }
+      "extensions": [
+        "ms-python.python"
+      ]
     }
   }
 }
