@@ -306,6 +306,7 @@ async def init(role: str, problem: str, clue: int, motivation: int, confidence:i
         
         # Extract content from the AI response
         areas_content = areas_completion.choices[0].message.content
+        print(areas_content)
         
         if not areas_content:
             print(areas_content)
@@ -317,6 +318,7 @@ async def init(role: str, problem: str, clue: int, motivation: int, confidence:i
             areas_with_rating = json.loads(areas_content)
         except json.JSONDecodeError as e:
             raise HTTPException(status_code=400, detail="Invalid Areas Prompt2")
+        print(areas_with_rating)
         
             
         # Validate against expected schema
@@ -327,6 +329,7 @@ async def init(role: str, problem: str, clue: int, motivation: int, confidence:i
         # Get list of valid area keys
         # print(areas_list)
         existing_area_keys = [area.innovation_area_name for area in areas_list]
+        print(existing_area_keys)
         
     
         # Filter, sort, and limit areas by rating
@@ -335,15 +338,18 @@ async def init(role: str, problem: str, clue: int, motivation: int, confidence:i
                 [area for area in areas_with_rating.keys() if area in existing_area_keys],
                 key=lambda a: areas_with_rating[a],
                 reverse=True
-            )[:4]
+            )
         )
         # print(filtered_areas)
         
         # Initialize response
         init_response = []
         
+        count = 0
         # For each area, fetch details and relevant contacts
         for area in filtered_areas:
+            if count >= 3:
+                break
             # Get area data from KV
             area_data = db.query(InnovationAreas).filter(InnovationAreas.innovation_area_name == area).first()
             
@@ -358,7 +364,10 @@ async def init(role: str, problem: str, clue: int, motivation: int, confidence:i
             # print(matching_contacts)
             
             # Fetch contacts for this area
-            for c in matching_contacts:
+            if len(matching_contacts) < 3:
+                continue
+            count += 1
+            for c in matching_contacts[:3]:
                 contact_data = db.query(Experts).filter(Experts.expert_id == c.expert_id).first()
                 
                 if not contact_data:
