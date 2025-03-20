@@ -19,8 +19,3 @@ export type ContactKV = {
 };
 
 export type Profile = 'CLUELESS' | 'MOTIVATED' | 'HESITANT';
-
-export enum Area {
-	SALES = 'Sales',
-	MARKETING = 'Marketing',
-}

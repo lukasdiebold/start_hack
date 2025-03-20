@@ -1,5 +1,5 @@
 import { Service } from '..';
-import { Area, AreaKV, ContactKV, Profile } from '../types';
+import { AreaKV, ContactKV, Profile } from '../types';
 import { authenticateToken } from './auth_v1';
 import OpenAI from 'openai';
 import { z } from 'zod';
@@ -36,7 +36,7 @@ type ContactData = {
 };
 
 const areasResponseSchema = z.object({
-	areasWithRating: z.record(z.enum(enumToStringArray(Area)), z.number()),
+	areasWithRating: z.record(z.string(), z.number()),
 });
 
 const contactsResponseSchema = z.object({
