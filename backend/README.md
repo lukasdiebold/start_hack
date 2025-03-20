@@ -24,7 +24,7 @@ The Python backend uses FastAPI with SQLite database and JWT authentication.
 1. Navigate to the Python backend directory:
 
 ```bash
-cd backend_python
+cd backend/app
 ```
 
 2. Create and activate a virtual environment:
