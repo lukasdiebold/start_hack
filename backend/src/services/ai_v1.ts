@@ -135,7 +135,7 @@ const service: Service = {
 
 					let contacts: ContactData[] = [];
 
-					for (let contactId in areaKvData.contactIds) {
+					for (let contactId of areaKvData.contactIds) {
 						const contactKvData = await env.CONTACTS_KV.get<ContactKV>(contactId);
 
 						if (!contactKvData) {
