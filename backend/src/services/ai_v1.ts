@@ -57,7 +57,7 @@ const service: Service = {
 
 				const payload = await request.json<InitPayload>();
 
-				const areasPromise = env.AREA_KV.list();
+				const areas = await env.AREA_KV.list();
 
 				const areasCompletions = await client.chat.completions.create({
 					model: 'gpt-4o',
@@ -67,7 +67,7 @@ const service: Service = {
 							content: `Output an 'areas' object without any codeblocks, where the number represents the percentage of a fitting: 
 							{
 								"areasWithRating": {
-									${enumToStringArray(Area).map((area) => {
+									${areas.keys.map((area) => {
 										return `"${area}": [percentage (0 - 100)],`;
 									})} 
 								}
@@ -79,7 +79,7 @@ const service: Service = {
 							content: `I am ${payload.profile.toLowerCase}. 
 								Give me the percentages of how strong the areas ${
 									//build a string of possible areas
-									(await areasPromise).keys.map((area) => area.name.toLowerCase).join(',\n')
+									areas.keys.map((area) => area.name.toLowerCase).join(',\n')
 								} influences the problem: "${payload.problem}".`,
 						},
 					],
