@@ -91,6 +91,8 @@ const service: Service = {
 
 				const areasContent = areasCompletions.choices[0].message.content;
 
+				console.log('content: ', areasContent);
+
 				if (!areasContent) {
 					console.log('No Areas Content');
 					return new Response('Invalid Areas Prompt', { status: 400 });
@@ -111,42 +113,50 @@ const service: Service = {
 
 				const areasWithRating = areasZodObject.data.areasWithRating;
 
-				const filteredAreasWithRating = Object.keys(areasWithRating)
-					.filter((area) => areas.keys.map((ns) => ns.name).includes(area))
+				const existingAreaKeys = areas.keys.map((ns) => ns.name);
+
+				const filteredAreas = Object.keys(areasWithRating)
+					.filter((area) => existingAreaKeys.includes(area))
 					.sort((keyA, keyB) => (areasWithRating[keyA] - areasWithRating[keyB] ? 1 : -1))
-					.slice(0, 4)
-					.map(async (areaKey): Promise<AreaData | null> => {
-						const areaKVData = await env.AREA_KV.get<AreaKV>(areaKey);
-						if (!areaKVData) {
-							console.log('Area Data Not Found');
-							return null;
+					.slice(0, 4);
+
+				console.log('filtered Areas: ', filteredAreas);
+
+				let initResponse: InitResponse = [];
+
+				for (let area of filteredAreas) {
+					console.log(area);
+					const areaKvData = await env.AREA_KV.get<AreaKV>(area);
+
+					if (!areaKvData) {
+						console.log(`Area ${area} Data Not Found`);
+						continue;
+					}
+
+					let contacts: ContactData[] = [];
+
+					for (let contactId in areaKvData.contactIds) {
+						const contactKvData = await env.CONTACTS_KV.get<ContactKV>(contactId);
+
+						if (!contactKvData) {
+							console.log(`Contact ${contactId} Data Not Found`);
+							continue;
 						}
 
-						const contactData = (
-							await Promise.all(
-								areaKVData.contactIds.map(async (id): Promise<ContactData | null> => {
-									const contactKVData = await env.CONTACTS_KV.get<ContactKV>(id);
+						contacts.push({
+							id: contactId,
+							...contactKvData,
+						});
+					}
 
-									if (!contactKVData) {
-										console.log('Contact Data Not Found');
-										return null;
-									}
-
-									return { ...contactKVData, id };
-								})
-							)
-						).filter((contact) => !!contact);
-
-						return {
-							area: {
-								name: areaKey,
-								rating: areasWithRating[areaKey],
-								contacts: contactData,
-							},
-						};
+					initResponse.push({
+						area: {
+							name: area,
+							rating: areasWithRating[area],
+							contacts,
+						},
 					});
-
-				const initResponse = (await Promise.all(filteredAreasWithRating)).filter((area) => !!area);
+				}
 
 				return new Response(JSON.stringify(initResponse), { status: 200 });
 			}
