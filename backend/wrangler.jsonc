@@ -3,6 +3,7 @@
 	"name": "start-hack-backend",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-03-19",
+	"workers_dev": false,
 	"observability": {
 		"enabled": true
 	},

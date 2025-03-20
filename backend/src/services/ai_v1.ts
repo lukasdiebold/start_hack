@@ -58,8 +58,6 @@ const service: Service = {
 
 				const areas = await env.AREA_KV.list();
 
-				console.log(JSON.stringify(areas));
-
 				const areasCompletions = await client.chat.completions.create({
 					model: 'gpt-4o',
 					messages: [
@@ -91,8 +89,6 @@ const service: Service = {
 
 				const areasContent = areasCompletions.choices[0].message.content;
 
-				console.log('content: ', areasContent);
-
 				if (!areasContent) {
 					console.log('No Areas Content');
 					return new Response('Invalid Areas Prompt', { status: 400 });
@@ -120,13 +116,10 @@ const service: Service = {
 					.sort((keyA, keyB) => (areasWithRating[keyA] - areasWithRating[keyB] ? 1 : -1))
 					.slice(0, 4);
 
-				console.log('filtered Areas: ', filteredAreas);
-
 				let initResponse: InitResponse = [];
 
 				for (let area of filteredAreas) {
-					console.log(area);
-					const areaKvData = await env.AREA_KV.get<AreaKV>(area);
+					const areaKvData: AreaKV | null = await env.AREA_KV.get(area, 'json');
 
 					if (!areaKvData) {
 						console.log(`Area ${area} Data Not Found`);
@@ -136,7 +129,7 @@ const service: Service = {
 					let contacts: ContactData[] = [];
 
 					for (let contactId of areaKvData.contactIds) {
-						const contactKvData = await env.CONTACTS_KV.get<ContactKV>(contactId);
+						const contactKvData: ContactKV | null = await env.CONTACTS_KV.get(contactId, 'json');
 
 						if (!contactKvData) {
 							console.log(`Contact ${contactId} Data Not Found`);
