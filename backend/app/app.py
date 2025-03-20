@@ -395,35 +395,70 @@ async def init(role: str, problem: str, db: Session = Depends(get_session_local)
         raise HTTPException(status_code=500, detail="AI Service Error")
 
 
-@app.get("/message", response_model=dict)
-async def message(current_user: User = Depends(get_current_user), db: Session = Depends(get_session_local)):
-    """
-    Placeholder for future message endpoint.
+class Message(BaseModel):
+    content: str
+    role: str
+
+class MessageRequest(BaseModel):
+    last_messages: List[Message]
+    start_data: Dict
+
+@app.post("/message")
+async def receive_messages(request: MessageRequest):
+    if not request.last_messages:
+        raise HTTPException(status_code=400, detail="last_messages cannot be empty")
+
+
+    print(request.start_data)
+    print(request.last_messages)
+    for m in request.last_messages:
+        print(m.role, ":", m.content)
     
-    Args:
-        context: JWT payload from authentication middleware
-        
-    Returns:
-        Simple message response
-    """
+    try:
+        messages = [
+            # TODO: Add three metrics
+                {
+                    "role": "system",
+                    "content": f"""
+                    You are a helpful assistant which guides users though an innovation process. Your users are leaders of their company 
+                    who look into how to innovate their business. We identified to most relevant fields of innovation and people that could be 
+                    helpful with these areas, they can be found below. You job now is, to guide the user through the process of making this innovation happen. 
+                    Your goal is to together with the user a roadmap on how to make this innovation happen. You can ask the user for more information, 
+                    suggest next steps. You should take care on the user provile with is based on how they characterized themself on the three metrics: 
 
+                    The following areas of innovation have been identified:
+                    {request.start_data}
+                    """
+                },
+                *[
+                    {
+                        "role": m.role,
+                        "content": m.content
+                    }
+                    for m in request.last_messages
+                ]
+        ]
 
+        areas_completion = client.chat.completions.create(
+            model="gpt-4o",
+            messages=messages
+        )
+        print("Post Request")
 
+        # Extract content from the AI response
+        content = areas_completion.choices[0].message.content
+
+            
+    except Exception as e:
+        # Log error and return 500
+        print(f"Error in AI init: {str(e)}")
+        raise HTTPException(status_code=500, detail="AI Service Error")
     
 
-
-
-
-    return {"message": "Message endpoint"}
+    return {"response": content}
 
 
 
 if __name__ == "__main__":
-    # import_innovation_data()
-    # run using uvicorn
     import uvicorn
-    # automatically restart server when code changes
-    # uvicorn.run(app, host="0.0.0.0", port=8000, debug=True)
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
-
-    # uvicorn.run(app, host="0.0.0.0", port=8000, )
