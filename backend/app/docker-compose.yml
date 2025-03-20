@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: backend
+    container_name: backend
+    env_file:
+      - .env
+    ports:
+     - 8000:8000
+    restart: unless-stopped
+    environment:
+     - PYTHONUNBUFFERED=1
+
+
