@@ -116,7 +116,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
     
     # File path
-    csv_path = "START Hack 25_Canton of St.Gallen_dataset innovation ecosystem_enriched.csv"
+    csv_path = "START Hack 25_Canton of St.Gallen_dataset innovation ecosystem_enriched_new.csv"
     
     # Create database session
     db = SessionLocal()

@@ -573,8 +573,8 @@ def generate_synthetic_data(file_path, output_path, min_people_per_focus=3):
     }
 
 if __name__ == "__main__":
-    input_file = 'START Hack 25_Canton of St.Gallen_dataset innovation ecosystem.csv'
-    output_file = 'START Hack 25_Canton of St.Gallen_dataset innovation ecosystem_enriched.csv'
+    input_file = 'START Hack 25_Canton of St.Gallen_dataset innovation ecosystem_enriched.csv'
+    output_file = 'START Hack 25_Canton of St.Gallen_dataset innovation ecosystem_enriched_new.csv'
     
     stats = generate_synthetic_data(input_file, output_file, min_people_per_focus=3)
     
