@@ -5,9 +5,22 @@ export type AccountKV = {
 	bio?: string;
 };
 
+export type AreaKV = {
+	contactIds: string[];
+};
+
+export type ContactKV = {
+	name: string;
+	description: string;
+	institution: string;
+	category: string;
+	email: string;
+	website: string;
+};
+
 export type Profile = 'CLUELESS' | 'MOTIVATED' | 'HESITANT';
 
-export enum Category {
+export enum Area {
 	SALES = 'Sales',
 	MARKETING = 'Marketing',
 }
