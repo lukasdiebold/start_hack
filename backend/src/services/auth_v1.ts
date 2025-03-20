@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { Service } from '..';
 import { hash, signJWT, verifyJWT } from '../crypto';
 import { AccountKV } from '../types';
@@ -34,6 +35,14 @@ const service: Service = {
 				//return new Response('Signup disabled', { status: 409 });
 
 				const { username, password, email } = await request.json<SignUpPayload>();
+
+				if (!z.string().email().safeParse(email).success) {
+					return new Response('Invalid Email');
+				}
+
+				if (!z.string().min(8).safeParse(password).success) {
+					return new Response('Password less than 8 chars');
+				}
 
 				const oldUser: AccountKV | null = await env.ACCOUNT_KV.get(username, 'json');
 				if (oldUser) return new Response('User already exists', { status: 400 });
