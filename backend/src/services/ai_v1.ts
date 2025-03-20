@@ -57,6 +57,8 @@ const service: Service = {
 
 				const payload = await request.json<InitPayload>();
 
+				const areasPromise = env.AREA_KV.list();
+
 				const areasCompletions = await client.chat.completions.create({
 					model: 'gpt-4o',
 					messages: [
@@ -77,9 +79,7 @@ const service: Service = {
 							content: `I am ${payload.profile.toLowerCase}. 
 								Give me the percentages of how strong the areas ${
 									//build a string of possible areas
-									enumToStringArray(Area)
-										.map((area) => area.toLowerCase)
-										.join(',\n')
+									(await areasPromise).keys.map((area) => area.name.toLowerCase).join(',\n')
 								} influences the problem: "${payload.problem}".`,
 						},
 					],
