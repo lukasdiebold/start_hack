@@ -4,3 +4,10 @@ export type AccountKV = {
 	email: string;
 	bio?: string;
 };
+
+export type Profile = 'CLUELESS' | 'MOTIVATED' | 'HESITANT';
+
+export enum Category {
+	SALES = 'Sales',
+	MARKETING = 'Marketing',
+}
