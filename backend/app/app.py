@@ -135,6 +135,10 @@ class UserCreate(BaseModel):
     problem: Optional[str] = None
     profile: Optional[str] = None
 
+class InitData(BaseModel):
+    role: str
+    problem: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -255,13 +259,14 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     }
 
 @app.get("/init", response_model=list)
-async def init(current_user: User = Depends(get_current_user), db: Session = Depends(get_session_local)):
+async def init(role: str, problem: str, db: Session = Depends(get_session_local)):
     """
     Initialize AI matching process based on user problem.
     
     Args:
-        payload: Initial data including user name, company, problem and profile
-        context: JWT payload from authentication middleware
+        role: User's role in the company
+        problem: Problem faced by the user
+        db: Database session
         
     Returns:
         List of matched innovation areas with contacts
@@ -269,12 +274,8 @@ async def init(current_user: User = Depends(get_current_user), db: Session = Dep
     Raises:
         HTTPException: If OpenAI API fails or returned data is invalid
     """
-
-
-    
     # Get list of all areas names
     areas_list = db.query(InnovationAreas).all()
-    # print(areas_list)
 
     print("Pre Request")
     try:
@@ -295,8 +296,8 @@ async def init(current_user: User = Depends(get_current_user), db: Session = Dep
                 {
                     "role": "user",
                     "content": f"""
-                    Calculate the fit of the areas for the following person. {current_user.username} works at {current_user.user_company} 
-                    and has the problem: "{current_user.user_problem}".
+                    Calculate the fit of the areas for the following person. The person has the following role {role} 
+                    and has the problem: "{problem}".
                     """
                 }
             ]
