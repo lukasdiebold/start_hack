@@ -13,8 +13,34 @@ type InitPayload = {
 	profile: Profile;
 };
 
-const areaResponseSchema = z.object({
-	areas: z.record(z.enum(enumToStringArray(Area)), z.number()),
+type InitResponse = {
+	area: AreaData[];
+};
+
+type AreaData = {
+	name: string;
+	rating: number;
+	contacts: ContactDataWithRating[];
+};
+
+type ContactDataWithRating = ContactData & { rating: number };
+
+type ContactData = {
+	name: string;
+	id: string;
+	description: string;
+	institution: string;
+	category: string;
+	email: string;
+	website: string;
+};
+
+const areasResponseSchema = z.object({
+	areasWithRating: z.record(z.enum(enumToStringArray(Area)), z.number()),
+});
+
+const contactsResponseSchema = z.object({
+	contactsWithRating: z.record(z.string(), z.number()),
 });
 
 const service: Service = {
@@ -31,14 +57,14 @@ const service: Service = {
 
 				const payload = await request.json<InitPayload>();
 
-				const areaCompletions = await client.chat.completions.create({
+				const areasCompletions = await client.chat.completions.create({
 					model: 'gpt-4o',
 					messages: [
 						{
 							role: 'system',
 							content: `Output an 'areas' object without any codeblocks, where the number represents the percentage of a fitting: 
 							{
-								"areas": {
+								"areasWithRating": {
 									${enumToStringArray(Area).map((area) => {
 										return `"${area}": [percentage (0 - 100)],`;
 									})} 
@@ -59,32 +85,32 @@ const service: Service = {
 					],
 				});
 
-				const areaContent = areaCompletions.choices[0].message.content;
+				const areasContent = areasCompletions.choices[0].message.content;
 
-				if (!areaContent) {
-					console.log('No Area Content');
-					return new Response('Invalid Prompt', { status: 400 });
+				if (!areasContent) {
+					console.log('No Areas Content');
+					return new Response('Invalid Areas Prompt', { status: 400 });
 				}
 
-				const areaObject = safeJSON(areaContent);
+				const areasObject = safeJSON(areasContent);
 
-				if (!areaObject) {
-					console.log('Area Content Invalid JSON:', areaContent);
-					return new Response('Invalid Prompt', { status: 400 });
+				if (!areasObject) {
+					console.log('Areas Content Invalid JSON:', areasContent);
+					return new Response('Invalid Areas Prompt', { status: 400 });
 				}
 
-				const areaZodObject = areaResponseSchema.safeParse(areaObject);
+				const areasZodObject = areasResponseSchema.safeParse(areasObject);
 
-				if (!areaZodObject.success) {
-					console.log(areaZodObject.error);
-					return new Response('Invalid Prompt', { status: 400 });
+				if (!areasZodObject.success) {
+					console.log('Object: ' + JSON.stringify(areasObject) + ', Zod error :' + areasZodObject.error);
+					return new Response('Invalid Areas Prompt', { status: 400 });
 				}
 
-				const areas = areaZodObject.data.areas;
+				const areasWithRating = areasZodObject.data.areasWithRating;
 
-				const nullableAreaObjects = await Promise.all(
-					Object.keys(areas)
-						.sort((keyA, keyB) => (areas[keyA] - areas[keyB] ? 1 : -1))
+				const nullableAreaData = await Promise.all(
+					Object.keys(areasWithRating)
+						.sort((keyA, keyB) => (areasWithRating[keyA] - areasWithRating[keyB] ? 1 : -1))
 						.map(async (area) => {
 							const areaData = await env.AREA_KV.get<AreaKV>(area);
 
@@ -93,7 +119,7 @@ const service: Service = {
 								return null;
 							}
 
-							const nullableContacts = await Promise.all(
+							const nullableContactsData = await Promise.all(
 								areaData.contactIds.map(async (contactId) => {
 									const contactData = await env.CONTACTS_KV.get<ContactKV>(contactId);
 
@@ -102,7 +128,7 @@ const service: Service = {
 										return null;
 									}
 
-									return {
+									const contact: ContactData = {
 										name: contactData.name,
 										id: contactId,
 										description: contactData.description,
@@ -111,20 +137,22 @@ const service: Service = {
 										email: contactData.email,
 										website: contactData.website,
 									};
+
+									return contact;
 								})
 							);
 
-							const contacts = nullableContacts.filter((contact) => !!contact);
+							const contactsData = nullableContactsData.filter((contact) => !!contact);
 
 							const contactCompletions = await client.chat.completions.create({
 								model: 'gpt-4o',
 								messages: [
 									{
 										role: 'system',
-										content: `Output an 'areas' object without any codeblocks, where the number represents the percentage of a fitting: 
+										content: `Output an 'contacts' object without any codeblocks, where the number represents the percentage of a fitting: 
 										{
-											"areas": {
-												${contacts.map((contact) => {
+											"contactsWithRating": {
+												${contactsData.map((contact) => {
 													return `"${contact.id}": [percentage (0 - 100)],`;
 												})} 
 											}
@@ -136,20 +164,76 @@ const service: Service = {
 										content: `I am ${payload.profile.toLowerCase}. 
 											Give me the percentages of how good my contacts can help me ${
 												//build a string of possible contacts
-												contacts.map((contact) => `${contact.id}: ${contact.description}`).join(', ')
+												contactsData.map((contact) => `${contact.id}: ${contact.description}`).join(', ')
 											} 
 											with my problem: "${payload.problem}".`,
 									},
 								],
 							});
 
-							return { area, percentage: areas[area], contacts };
+							const contactsContent = contactCompletions.choices[0].message.content;
+
+							if (!contactsContent) {
+								console.log('No Contacts Content');
+								return null;
+							}
+
+							const contactsObject = safeJSON(contactsContent);
+
+							if (!contactsObject) {
+								console.log('Contacts Content Invalid JSON:', areasContent);
+								return null;
+							}
+
+							const contactsZodObject = contactsResponseSchema.safeParse(contactsObject);
+
+							if (!contactsZodObject.success) {
+								console.log(contactsZodObject.error);
+								return null;
+							}
+
+							const contactsWithRating = contactsZodObject.data.contactsWithRating;
+
+							const contacts = Object.keys(contactsWithRating)
+								.sort((keyA, keyB) => (contactsWithRating[keyA] - contactsWithRating[keyB] ? 1 : -1))
+								.map((contactId) => {
+									const contactData = contactsData.find((contact) => contact.id === contactId);
+
+									if (!contactData) {
+										console.log(`No Data For Contact: ${contactId}`);
+										return null;
+									}
+
+									const contact: ContactDataWithRating = {
+										id: contactData.id,
+										category: contactData.category,
+										description: contactData.description,
+										email: contactData.email,
+										institution: contactData.institution,
+										name: contactData.name,
+										website: contactData.website,
+										rating: contactsWithRating[contactId],
+									};
+
+									return contact;
+								})
+								.filter((contact) => !!contact);
+
+							const nullableAreaData: AreaData | null = {
+								name: area,
+								rating: areasWithRating[area],
+								contacts,
+							};
+
+							return nullableAreaData;
 						})
 				);
 
-				const areaObjects = nullableAreaObjects.filter((areaObject) => !!areaObject).splice(0, 4);
+				const initResponse: InitResponse = {
+					area: nullableAreaData.filter((areaObject) => !!areaObject).splice(0, 4),
+				};
 
-				return new Response(JSON.stringify(areaObjects), { status: 200 });
+				return new Response(JSON.stringify(initResponse), { status: 200 });
 			}
 			case 'POST message': {
 				return new Response('Message');
