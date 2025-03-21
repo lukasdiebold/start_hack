@@ -1,0 +1,19 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "homepage",
+	"compatibility_date": "2025-03-20",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"pages_build_output_dir": ".vercel/output/static",
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		"NEXT_PUBLIC_BACKEND_URL": "http://api.innovation-sg.ch:8000"
+	}
+}
