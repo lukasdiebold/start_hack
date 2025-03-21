@@ -2,8 +2,9 @@ import {
   TokenResponse
 } from './types';
 import { jwtDecode } from 'jwt-decode';
+import { env } from 'next-runtime-env';
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://127.0.0.1:8000';
+export const BASE_URL = env("NEXT_PUBLIC_BACKEND_URL") ?? process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://127.0.0.1:8000';
 
 export const fetchToken = async (username: string, password: string): Promise<TokenResponse> => {
   const response = await fetch(`${BASE_URL}/token`, {

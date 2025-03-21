@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '../components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from './contexts/authContext';
+import { PublicEnvScript } from 'next-runtime-env';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,6 +29,9 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang='en' suppressHydrationWarning>
+        <head>
+          <PublicEnvScript />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <ThemeProvider
