@@ -3,3 +3,4 @@ python_scripts/data_upload_with_keys.py
 *.DS_Store
 node_modules/
 venv/
+backend/app/.env
