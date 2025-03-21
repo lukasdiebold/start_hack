@@ -1,5 +1,7 @@
 services:
   backend:
+    build:
+      context: ./backend
     image: backend
     container_name: backend
     env_file:
@@ -11,9 +13,13 @@ services:
      - PYTHONUNBUFFERED=1
 
   frontend:
+    build:
+      context: ./frontend
     image: frontend
     container_name: frontend
+    env_file:
+      - .env
     ports:
-     - 80:3000
+     - 3000:3000
     restart: unless-stopped
 
