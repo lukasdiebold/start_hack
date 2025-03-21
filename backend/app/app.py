@@ -26,9 +26,9 @@ app = FastAPI(title="Innovation Ecosystem API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://innovation-sg.ch", "http://innovation-sg.ch", "http://innovation-sg.ch:3001", "http://innovation-sg.ch:3000", "http://localhost:3001"],  # Allows all origins
+    allow_origins=["https://innovation-sg.ch", "http://innovation-sg.ch", "http://innovation-sg.ch:3001", "http://innovation-sg.ch:3000", "http://localhost:3001", "*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicitly list all allowed methods
     allow_headers=["*"],  # Allows all headers
 )
 
@@ -192,6 +192,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     return user
+
+# Handle OPTIONS requests
+@app.options("/{path:path}")
+async def options_handler(path: str):
+    """
+    Handle OPTIONS requests for CORS preflight.
+    """
+    return {}
 
 # Root endpoint
 @app.get("/", tags=["Root"])
