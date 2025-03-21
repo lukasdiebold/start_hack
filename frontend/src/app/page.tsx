@@ -34,17 +34,11 @@ import {
 import { useStore } from '@/lib/store';
 
 const formSchema = z.object({
-  // email: z.string().email({ message: 'Invalid email address' }),
-  // event: z.string().min(1, { message: 'Event is required' }),
-  // key: z.string().length(6, { message: 'Key must be exactly 6 digits' }),
   role: z.string().min(1, { message: 'Role is required' }),
   problem: z.string().min(1, { message: 'Problem is required' }),
   confidence: z.number().int().min(1).max(10),
   clue: z.number().int().min(1).max(10),
   motivation: z.number().int().min(1).max(10),
-  // terms: z.boolean().refine((val) => val === true, {
-  //   message: 'You must accept the terms and conditions',
-  // }),
 });
 
 import { useState, useEffect } from 'react';

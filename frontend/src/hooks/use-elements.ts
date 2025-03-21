@@ -178,7 +178,7 @@ export const useEdgeParams = () => {
           const radians = degrees * (Math.PI / 180);
           // The position of the grandchild node is the position of the child node plus the added distance between child and grandchild (plus the size of the child node)
           const x =
-            nodes[i].position.x + size * 0.9* Math.cos(radians) + center.x;
+            nodes[i].position.x + size * 1.1 * Math.cos(radians) + center.x;
           const y =
             nodes[i].position.y + size * 0.5 * Math.sin(radians) + center.y;
 
