@@ -11,8 +11,6 @@ services:
     restart: unless-stopped
     environment:
      - PYTHONUNBUFFERED=1
-    volumes:
-     - /etc/letsencrypt:/etc/letsencrypt
 
   frontend:
     build:
