@@ -123,8 +123,8 @@ export default function InfoWindow() {
               <Mail className='w-4 h-4 mt-0.5 text-muted-foreground' />
               <div>
                 <p className='text-sm text-muted-foreground'>Email</p>
-                <a href={`mailto:${details.email}`} className='text-blue-500 hover:underline'>
-                  {details.email}
+                <a href={`mailto:${"contact.email@example.com"}`} className='text-blue-500 hover:underline'>
+                  {"contact.email@example.com"}
                 </a>
               </div>
             </div>
@@ -164,11 +164,11 @@ export default function InfoWindow() {
                     )}
                     {contact.email && (
                       <a 
-                        href={`mailto:${contact.email}`}
+                        href={`mailto:${"contact.email@example.com"}`}
                         className='text-sm text-blue-500 hover:underline flex items-center gap-1'
                       >
                         <Mail className='w-3 h-3' />
-                        {contact.email}
+                        {"contact.email@example.com"}
                       </a>
                     )}
                   </div>
